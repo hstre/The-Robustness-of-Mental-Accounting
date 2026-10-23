@@ -46,7 +46,10 @@ class OpenRouterClient:
                 err = f"transport: {e!r}"
             else:
                 if r.status_code == 200:
-                    data = r.json()
+                    try:
+                        data = r.json()
+                    except ValueError:
+                        data = {"error": f"invalid JSON body: {r.text[:200]!r}"}
                     if "error" in data:
                         err = f"api error: {data['error']}"
                     elif not data.get("choices"):
