@@ -3,7 +3,7 @@
 
 # Simulated participants per model. The paper targeted 250 per country (power
 # analysis); start with a pilot (e.g. 10) and check parse/refusal rates first.
-n_participants: 10        # pilot size; raise deliberately (cost!)
+n_participants: 3         # runs per model; raise deliberately (cost!)
 
 # Identical generation settings for all models.
 generation:
