@@ -251,6 +251,8 @@ def analyze(raw_dir: Path, out_dir: Path, families: dict[str, str] | None = None
         n_included=("included", "sum"),
         cost_usd=("cost_usd", "sum"),
     )
+    samp["n_truncated"] = df.groupby("model")["error"].apply(lambda e: e.fillna("").str.startswith("truncated").sum())
+    samp["n_unparseable"] = df.groupby("model")["error"].apply(lambda e: e.fillna("").str.startswith("unparseable").sum())
     samp["family"] = samp.index.map(lambda m: families.get(m, ""))
     samp["parse_retry_rate"] = df.groupby("model")["pages"].apply(
         lambda s: np.mean([len(p["raw"]) > 1 for pages in s for p in pages]))

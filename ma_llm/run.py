@@ -74,7 +74,8 @@ async def run_participant(
             pages.append({"item": item_id, "position": idx, "options": options,
                           "raw": raw, "parsed": parsed})
             if parsed is None:
-                rec["error"] = f"unparseable answer on {item_id}"
+                truncated = all(r["finish_reason"] == "length" for r in raw)
+                rec["error"] = f"{'truncated' if truncated else 'unparseable'} answer on {item_id}"
                 break
             answers[item_id] = parsed
         else:
@@ -103,7 +104,7 @@ async def run_model(model_id: str, cfg: dict[str, Any], out_dir: Path, n: int | 
         async with sem:
             rec = await run_participant(client, model_id, pid, cfg)
         async with lock:
-            if rec["error"] and "unparseable" not in rec["error"]:
+            if rec["error"] and " answer on " not in rec["error"]:
                 # API/transport failure: not a participant outcome; retried on the next run.
                 print(f"[{model_id}] pid {pid} not saved: {rec['error'][:200]}")
                 return

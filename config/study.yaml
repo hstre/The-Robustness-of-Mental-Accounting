@@ -8,7 +8,7 @@ n_participants: 250
 # Identical generation settings for all models.
 generation:
   temperature: 1.0        # sampling variance stands in for between-person variance
-  max_tokens: 2000        # includes reasoning tokens for reasoning models
+  max_tokens: 8000        # includes reasoning tokens; 2000 truncated some reasoning models
   # Uniform, low reasoning effort for all models that support it (ignored otherwise).
   # Humans answered quickly and intuitively; set to null to use provider defaults.
   reasoning:
