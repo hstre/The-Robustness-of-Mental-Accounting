@@ -1,0 +1,51 @@
+# Study configuration. Model IDs were checked against https://openrouter.ai/api/v1/models
+# on 2026-10-23; run `python -m ma_llm check` before a run, availability changes.
+
+# Simulated participants per model. The paper targeted 250 per country (power
+# analysis); start with a pilot (e.g. 10) and check parse/refusal rates first.
+n_participants: 250
+
+# Identical generation settings for all models.
+generation:
+  temperature: 1.0        # sampling variance stands in for between-person variance
+  max_tokens: 2000        # includes reasoning tokens for reasoning models
+  # Uniform, low reasoning effort for all models that support it (ignored otherwise).
+  # Humans answered quickly and intuitively; set to null to use provider defaults.
+  reasoning:
+    effort: low
+
+max_parse_retries: 2      # re-asks per page before the participant counts as incomplete
+concurrency: 8            # parallel participants per model
+shuffle_options: false    # paper presented options in a fixed order
+
+# 12 models, 12 different developers ("families"). One mid/upper-tier general chat
+# model per family; the paper's countries are replaced by models.
+models:
+  - id: openai/gpt-6-sol
+    family: OpenAI
+  - id: anthropic/claude-sonnet-5.5
+    family: Anthropic
+  - id: google/gemini-3.8-flash
+    family: Google
+  - id: meta/muse-spark-1.3
+    family: Meta
+  - id: mistralai/mistral-large-4-0
+    family: Mistral
+  - id: deepseek/deepseek-v4.1-flash
+    family: DeepSeek
+  - id: qwen/qwen3.8-max-0902
+    family: Alibaba (Qwen)
+  - id: x-ai/grok-4.7
+    family: xAI
+  - id: moonshotai/kimi-k3
+    family: Moonshot
+  - id: z-ai/glm-5.3
+    family: Zhipu (GLM)
+  - id: cohere/command-a-plus
+    family: Cohere
+  - id: minimax/minimax-m3
+    family: MiniMax
+
+# Alternatives if one of the above fails or refuses too often:
+#   nvidia/nemotron-3-ultra-550b-a55b, xiaomi/mimo-v2.6-pro, bytedance-seed/seed-2-1-turbo,
+#   tencent/hy3, amazon/nova-2-lite-v1, openai/gpt-oss-120b, google/gemma-4-31b-it
