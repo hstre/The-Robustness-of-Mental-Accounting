@@ -88,7 +88,7 @@ def test_end_to_end(tmp_path):
     for model in ("fake/a", "fake/b", "fake/c", "fake/d"):
         with (raw / f"{model.replace('/', '__')}.jsonl").open("w") as f:
             for pid in range(120):
-                rec = asyncio.run(run_participant(FakeClient(hash((model, pid))), model, pid, CFG))
+                rec = asyncio.run(run_participant(FakeClient(1000 * len(model) + pid + ord(model[-1])), model, pid, CFG))
                 assert rec["complete"], rec["error"]
                 f.write(json.dumps(rec) + "\n")
     out = tmp_path / "results"
