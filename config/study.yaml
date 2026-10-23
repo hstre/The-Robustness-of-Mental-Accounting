@@ -15,7 +15,7 @@ generation:
     effort: low
 
 max_parse_retries: 2      # re-asks per page before the participant counts as incomplete
-concurrency: 8            # parallel participants per model
+concurrency: 2            # parallel participants per model
 shuffle_options: false    # paper presented options in a fixed order
 
 # 12 models, 12 different developers ("families"). One mid/upper-tier general chat

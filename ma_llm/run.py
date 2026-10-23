@@ -66,6 +66,10 @@ async def run_participant(
                 tokens_out += int(u.get("completion_tokens") or 0)
                 raw.append({"content": resp["content"], "finish_reason": resp["finish_reason"],
                             "provider": resp["provider"]})
+                if not resp["content"].strip():
+                    # Empty reply (e.g. reasoning hit max_tokens): some providers reject empty
+                    # assistant turns in the history, so just resend the same page.
+                    continue
                 messages.append({"role": "assistant", "content": resp["content"]})
                 parsed = parse_answer(item, resp["content"], options)
                 if parsed is not None:
