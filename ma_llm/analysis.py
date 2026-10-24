@@ -24,6 +24,7 @@ import pandas as pd
 from scipy import stats
 
 from .scenarios import FIN_LIT_CORRECT, QUALITY
+from .variants import VARIANTS, Variant
 
 # Pooled human estimates, Priolo et al. (2026), Table 3 (log OR for Game, Jacket,
 # Play, Plane; evidence ratio for MrAB; Cohen's d for Drink and Gym).
@@ -101,68 +102,80 @@ def cohens_d(x1: np.ndarray, x0: np.ndarray) -> tuple[float, float]:
     return d, math.sqrt((n1 + n0) / (n1 * n0) + d**2 / (2 * (n1 + n0)))
 
 
-def game_effect(ans: pd.Series, rng: np.random.Generator, n_boot: int = 1000) -> tuple[float, float]:
-    """P(price >= market value), stranger vs friend. 12 prices per participant, so the
-    SE comes from a participant-level cluster bootstrap."""
+def game_effect(ans: pd.Series, items: dict, rng: np.random.Generator, n_boot: int = 1000) -> tuple[float, float]:
+    """P(price >= market value), stranger vs friend. Up to 12 prices per participant, so
+    the SE comes from a participant-level cluster bootstrap."""
     per_p = []
     for a in ans:
-        st = fr = 0
+        st = fr = trials = 0
         for c in ("Game1", "Game2", "Game3"):
-            g = a[c]
-            st += (g["stranger"] >= 5) + (g["stranger_face10"] >= 10)
-            fr += (g["friend"] >= 5) + (g["friend_face10"] >= 10)
-        per_p.append((st, fr))
-    arr = np.array(per_p, dtype=float)  # events out of 6 per buyer type
+            if c not in a:
+                continue
+            g, face, alt = a[c], items[c].params["face"], items[c].params["alt"]
+            st += (g["stranger"] >= face) + (g[f"stranger_face{alt}"] >= alt)
+            fr += (g["friend"] >= face) + (g[f"friend_face{alt}"] >= alt)
+            trials += 2
+        per_p.append((st, fr, trials))
+    arr = np.array(per_p, dtype=float)  # events per buyer type, trials per buyer type
     n = len(arr)
 
     def est(x: np.ndarray) -> float:
-        s, f = x[:, 0].sum(), x[:, 1].sum()
-        return _log_or(s, 6 * len(x) - s, f, 6 * len(x) - f)[0]
+        s, f, t = x[:, 0].sum(), x[:, 1].sum(), x[:, 2].sum()
+        return _log_or(s, t - s, f, t - f)[0]
 
     point = est(arr)
     boots = [est(arr[rng.integers(0, n, n)]) for _ in range(n_boot)]
     se_boot = float(np.std(boots, ddof=1))
     # Floor: analytic SE treating each participant as one observation per buyer type.
-    s, f = arr[:, 0].sum() / 6, arr[:, 1].sum() / 6
+    s, f = (arr[:, 0] / arr[:, 2]).sum(), (arr[:, 1] / arr[:, 2]).sum()
     se_floor = _log_or(s, n - s, f, n - f)[1]
     return point, max(se_boot, se_floor)
 
 
 def answer_col(df: pd.DataFrame, item: str, key: str = "answer") -> pd.Series:
-    return df["answers"].apply(lambda a: a[item][key])
+    """Answers of the participants who saw ``item`` (all of them in within designs)."""
+    a = df["answers"][df["answers"].apply(lambda x: item in x)]
+    return a.apply(lambda x: x[item][key])
 
 
-def model_effects(df: pd.DataFrame, rng: np.random.Generator) -> dict[str, tuple[float, float]]:
-    """All within-subjects effects for one model's included participants."""
+def gym_key(items: dict) -> str:
+    return next(iter(items["Gym1"].params["statements"]))  # "I wasted $<amount>"
+
+
+def model_effects(df: pd.DataFrame, rng: np.random.Generator, items: dict) -> dict[str, tuple[float, float]]:
+    """All effects for one model's included participants. Within designs compare both
+    conditions of the same participants; the between design compares groups."""
     out = {}
     m1, m2, m3, m4 = (answer_col(df, f"MrAB{i}").to_numpy() for i in range(1, 5))
     n = len(df)
     out["MrAB_gains"] = evidence_ratio(int(((m1 == "A") & (m3 == "B")).sum()), n)
     out["MrAB_losses"] = evidence_ratio(int(((m2 == "A") & (m4 == "B")).sum()), n)
-    out["Game"] = game_effect(df["answers"], rng)
-    p1, p2 = answer_col(df, "Drink1", "price").to_numpy(), answer_col(df, "Drink2", "price").to_numpy()
-    ok = (p1 > 0) & (p2 > 0)
-    out["Drink"] = cohens_d(np.log(p1[ok]), np.log(p2[ok]))
+    out["Game"] = game_effect(df["answers"], items, rng)
+    p1 = answer_col(df, "Drink1", "price").to_numpy(dtype=float)
+    p2 = answer_col(df, "Drink2", "price").to_numpy(dtype=float)
+    out["Drink"] = cohens_d(np.log(p1[p1 > 0]), np.log(p2[p2 > 0]))
     out["Jacket"] = log_or_binary(answer_col(df, "Jacket1").to_numpy() == "Yes",
                                   answer_col(df, "Jacket2").to_numpy() == "Yes")
     out["Play"] = log_or_binary(answer_col(df, "Play2").to_numpy() == "Yes",
                                 answer_col(df, "Play1").to_numpy() == "Yes")
     # 1 = strongly agree ... 5 = strongly disagree; per-session payment (Gym1) should
-    # produce more agreement with "I wasted $20" -> Gym2 - Gym1 > 0.
-    out["Gym"] = cohens_d(answer_col(df, "Gym2", "wasted_20").to_numpy().astype(float),
-                          answer_col(df, "Gym1", "wasted_20").to_numpy().astype(float))
-    pay = "Pay your friend $35 for the coupon"
+    # produce more agreement with "I wasted $<amount>" -> Gym2 - Gym1 > 0.
+    k = gym_key(items)
+    out["Gym"] = cohens_d(answer_col(df, "Gym2", k).to_numpy().astype(float),
+                          answer_col(df, "Gym1", k).to_numpy().astype(float))
+    pay = items["Plane1"].options[0]
     out["Plane"] = log_or_binary(answer_col(df, "Plane1").to_numpy() == pay,
                                  answer_col(df, "Plane2").to_numpy() == pay)
     return out
 
 
-def between_subjects_effects(df: pd.DataFrame) -> dict[str, tuple[float, float]]:
+def between_subjects_effects(df: pd.DataFrame, items: dict) -> dict[str, tuple[float, float]]:
     """Paper's robustness check: only the condition each participant saw first."""
+    pay = items["Plane1"].options[0]
     specs = {
         "Jacket": ("Jacket1", "Jacket2", lambda a: a == "Yes"),
         "Play": ("Play2", "Play1", lambda a: a == "Yes"),
-        "Plane": ("Plane1", "Plane2", lambda a: a == "Pay your friend $35 for the coupon"),
+        "Plane": ("Plane1", "Plane2", lambda a: a == pay),
     }
     out = {}
     for eff, (c1, c0, f) in specs.items():
@@ -173,10 +186,12 @@ def between_subjects_effects(df: pd.DataFrame) -> dict[str, tuple[float, float]]
     return out
 
 
-def descriptives(df: pd.DataFrame) -> dict[str, float]:
+def descriptives(df: pd.DataFrame, items: dict) -> dict[str, float]:
     """Response proportions that make the effects interpretable for LLMs."""
     a = df["answers"]
-    pay = "Pay your friend $35 for the coupon"
+    pay = items["Plane1"].options[0]
+    k = gym_key(items)
+    games = ("Game1", "Game2", "Game3")
     out = {
         "MrAB1_A": (answer_col(df, "MrAB1") == "A").mean(),
         "MrAB2_A": (answer_col(df, "MrAB2") == "A").mean(),
@@ -188,12 +203,12 @@ def descriptives(df: pd.DataFrame) -> dict[str, float]:
         "Jacket2_yes": (answer_col(df, "Jacket2") == "Yes").mean(),
         "Play1_yes": (answer_col(df, "Play1") == "Yes").mean(),
         "Play2_yes": (answer_col(df, "Play2") == "Yes").mean(),
-        "Gym1_wasted20_mean": answer_col(df, "Gym1", "wasted_20").mean(),
-        "Gym2_wasted20_mean": answer_col(df, "Gym2", "wasted_20").mean(),
-        "Plane1_pay35": (answer_col(df, "Plane1") == pay).mean(),
-        "Plane2_pay35": (answer_col(df, "Plane2") == pay).mean(),
-        "Game_friend_median": a.apply(lambda x: np.median([x[c]["friend"] for c in ("Game1", "Game2", "Game3")])).median(),
-        "Game_stranger_median": a.apply(lambda x: np.median([x[c]["stranger"] for c in ("Game1", "Game2", "Game3")])).median(),
+        "Gym1_wasted_mean": answer_col(df, "Gym1", k).mean(),
+        "Gym2_wasted_mean": answer_col(df, "Gym2", k).mean(),
+        "Plane1_pay_full": (answer_col(df, "Plane1") == pay).mean(),
+        "Plane2_pay_full": (answer_col(df, "Plane2") == pay).mean(),
+        "Game_friend_median": a.apply(lambda x: np.median([x[c]["friend"] for c in games if c in x])).median(),
+        "Game_stranger_median": a.apply(lambda x: np.median([x[c]["stranger"] for c in games if c in x])).median(),
         "fin_lit_mean": a.apply(lambda x: sum(x[k]["answer"] == v for k, v in FIN_LIT_CORRECT.items())).mean(),
     }
     return {k: float(v) for k, v in out.items()}
@@ -238,7 +253,10 @@ def classical_mds(dist: np.ndarray, dims: int = 3) -> tuple[np.ndarray, np.ndarr
 
 # Driver ------------------------------------------------------------------------------
 
-def analyze(raw_dir: Path, out_dir: Path, families: dict[str, str] | None = None, seed: int = 1) -> None:
+def analyze(raw_dir: Path, out_dir: Path, families: dict[str, str] | None = None, seed: int = 1,
+            variant: Variant | None = None) -> None:
+    variant = variant or VARIANTS["base"]
+    items = variant.items
     out_dir.mkdir(parents=True, exist_ok=True)
     rng = np.random.default_rng(seed)
     families = families or {}
@@ -263,15 +281,16 @@ def analyze(raw_dir: Path, out_dir: Path, families: dict[str, str] | None = None
     for model, g in inc.groupby("model"):
         if len(g) < 2:
             continue
-        for eff, (e, se) in model_effects(g, rng).items():
+        for eff, (e, se) in model_effects(g, rng, items).items():
             rows.append({"model": model, "family": families.get(model, ""), "effect": eff,
                          "metric": METRIC[eff], "n": len(g), "estimate": e, "se": se,
                          "ci_low": e - Z * se, "ci_high": e + Z * se,
                          "replicated": bool(np.isfinite(e) and e - Z * se > 0)})
-        for eff, (e, se) in between_subjects_effects(g).items():
-            between.append({"model": model, "effect": eff, "estimate": e, "se": se,
-                            "ci_low": e - Z * se, "ci_high": e + Z * se})
-        desc.append({"model": model, **descriptives(g)})
+        if variant.design == "within":
+            for eff, (e, se) in between_subjects_effects(g, items).items():
+                between.append({"model": model, "effect": eff, "estimate": e, "se": se,
+                                "ci_low": e - Z * se, "ci_high": e + Z * se})
+        desc.append({"model": model, **descriptives(g, items)})
     eff_df = pd.DataFrame(rows)
     eff_df.to_csv(out_dir / "effects_by_model.csv", index=False)
     pd.DataFrame(between).to_csv(out_dir / "between_subjects.csv", index=False)

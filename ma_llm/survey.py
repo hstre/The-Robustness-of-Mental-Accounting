@@ -12,13 +12,10 @@ import random
 import re
 from typing import Any
 
-from .scenarios import BLOCKS, FIN_LIT, GYM_SCALE, GYM_STATEMENTS, ITEMS, QUALITY, Item
+from .scenarios import FIN_LIT, GYM_SCALE, QUALITY, Item
+from .variants import BETWEEN_GROUPS, PARTICIPANT_PROMPT, VARIANTS, Variant
 
-SYSTEM_PROMPT = (
-    "You are taking part in an online survey about how people make decisions. "
-    "Answer every question as a survey participant, according to your own judgement. "
-    "There are no right or wrong answers. Always reply in exactly the requested format."
-)
+SYSTEM_PROMPT = PARTICIPANT_PROMPT
 
 INTRO = (
     "Welcome to this study on decision-making. On the following pages you will read short "
@@ -27,26 +24,38 @@ INTRO = (
 )
 
 
-def item_order(rng: random.Random, include_extras: bool = True) -> list[str]:
-    """Randomized block order (fixed order within blocks), followed by the
-    financial-literacy items and the data-quality question, as in the paper."""
-    blocks = BLOCKS[:]
-    rng.shuffle(blocks)
-    order = [i for b in blocks for i in b]
+def item_order(rng: random.Random, include_extras: bool = True, variant: Variant | None = None) -> list[str]:
+    """Within: randomized block order (fixed order within blocks), as in the paper.
+    Between: one random condition per scenario, all in random order.
+    Followed by the financial-literacy items and the data-quality question."""
+    variant = variant or VARIANTS["base"]
+    if variant.design == "between":
+        order = [rng.choice(g) for g in BETWEEN_GROUPS]
+        rng.shuffle(order)
+    else:
+        blocks = [list(b) for b in variant.blocks]
+        rng.shuffle(blocks)
+        order = [i for b in blocks for i in b]
     if include_extras:
         order += [it.id for it in FIN_LIT] + [QUALITY.id]
     return order
 
 
-def get_item(item_id: str) -> Item:
-    if item_id in ITEMS:
-        return ITEMS[item_id]
+def get_item(item_id: str, variant: Variant | None = None) -> Item:
+    items = (variant or VARIANTS["base"]).items
+    if item_id in items:
+        return items[item_id]
     for it in FIN_LIT:
         if it.id == item_id:
             return it
     if item_id == QUALITY.id:
         return QUALITY
     raise KeyError(item_id)
+
+
+def game_keys(item: Item) -> list[str]:
+    alt = item.params["alt"]
+    return ["friend", "stranger", f"friend_face{alt}", f"stranger_face{alt}"]
 
 
 def format_instruction(item: Item, options: list[str] | None = None) -> str:
@@ -60,19 +69,22 @@ def format_instruction(item: Item, options: list[str] | None = None) -> str:
     if item.kind == "price":
         return 'Reply only with a JSON object of the form {"price": <amount in US dollars, a number>}.'
     if item.kind == "game_prices":
+        alt, label = item.params["alt"], item.params.get("alt_label", "face value")
+        k = game_keys(item)
         return (
             "Reply only with a JSON object with four prices in US dollars (numbers):\n"
-            '{"friend": <price if the buyer is a friend>, '
-            '"stranger": <price if the buyer is a stranger>, '
-            '"friend_face10": <price for a friend if the face value were $10>, '
-            '"stranger_face10": <price for a stranger if the face value were $10>}'
+            f'{{"{k[0]}": <price if the buyer is a friend>, '
+            f'"{k[1]}": <price if the buyer is a stranger>, '
+            f'"{k[2]}": <price for a friend if the {label} were ${alt}>, '
+            f'"{k[3]}": <price for a stranger if the {label} were ${alt}>}}'
         )
     if item.kind == "ratings":
-        stmts = "\n".join(f'- "{k}": {v}' for k, v in GYM_STATEMENTS.items())
+        st = item.params["statements"]
+        stmts = "\n".join(f'- "{k}": {v}' for k, v in st.items())
+        form = ", ".join(f'"{k}": <1-5>' for k in st)
         return (
             f"Rate each statement on a scale from 1 to 5 ({GYM_SCALE}).\n{stmts}\n\n"
-            'Reply only with a JSON object of the form '
-            '{"wasted_20": <1-5>, "wasted_nothing": <1-5>, "wasted_something": <1-5>}.'
+            f"Reply only with a JSON object of the form {{{form}}}."
         )
     raise ValueError(item.kind)
 
@@ -162,7 +174,7 @@ def parse_answer(item: Item, text: str, options: list[str] | None = None) -> dic
         return {"price": p} if p is not None and p >= 0 else None
     if item.kind == "game_prices":
         out = {}
-        for k in ("friend", "stranger", "friend_face10", "stranger_face10"):
+        for k in game_keys(item):
             p = _to_number(obj.get(k))
             if p is None or p < 0:
                 return None
@@ -170,7 +182,7 @@ def parse_answer(item: Item, text: str, options: list[str] | None = None) -> dic
         return out
     if item.kind == "ratings":
         out = {}
-        for k in GYM_STATEMENTS:
+        for k in item.params["statements"]:
             r = _to_number(obj.get(k))
             if r is None or r not in (1, 2, 3, 4, 5):
                 return None

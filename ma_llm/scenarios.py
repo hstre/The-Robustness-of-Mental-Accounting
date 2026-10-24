@@ -41,6 +41,9 @@ class Item:
     text: str
     kind: str  # "choice" | "price" | "game_prices" | "ratings"
     options: list[str] = field(default_factory=list)
+    # game_prices: {"face": market value, "alt": hypothetical face value}
+    # ratings: {"statements": {key: text}}, first key = "I wasted <amount>"
+    params: dict = field(default_factory=dict)
 
 
 # Combined outcomes: MrAB (Thaler 1985) -- DV: A / B / No difference ----------
@@ -90,7 +93,7 @@ GAME1 = Item(
     "you by a friend for free. You want to get rid of the extra ticket, and you know the "
     "ticket's face value price is $5. You find someone who wants the ticket. There is no law "
     "against charging more than the price marked on the ticket.\n" + _GAME_QUESTION,
-    "game_prices",
+    "game_prices", params={"face": 5, "alt": 10},
 )
 GAME2 = Item(
     "Game2", "Game",
@@ -99,7 +102,7 @@ GAME2 = Item(
     "ticket. You want to get rid of the extra ticket, and you know the ticket's face value "
     "price is $5. You find someone who wants the ticket. There is no law against charging "
     "more than the price marked on the ticket.\n" + _GAME_QUESTION,
-    "game_prices",
+    "game_prices", params={"face": 5, "alt": 10},
 )
 GAME3 = Item(
     "Game3", "Game",
@@ -108,7 +111,7 @@ GAME3 = Item(
     "you bought them from another person. You want to get rid of the extra ticket and you "
     "know the ticket's face value price is $5. You find someone who wants the ticket. There "
     "is no law against charging more than the price marked on the ticket.\n" + _GAME_QUESTION,
-    "game_prices",
+    "game_prices", params={"face": 5, "alt": 10},
 )
 
 # Transaction utility: Drink (Thaler 1985) -- DV: willingness to pay ----------
@@ -180,7 +183,7 @@ GYM1 = Item(
     "(non-refundable) per session. One Monday, just after you have paid and changed into "
     "your gym clothes, you receive a phone call that requires you to leave and forgo your "
     "exercise that evening.\n" + _GYM_QUESTION,
-    "ratings",
+    "ratings", params={"statements": GYM_STATEMENTS},
 )
 GYM2 = Item(
     "Gym2", "Gym",
@@ -189,7 +192,7 @@ GYM2 = Item(
     "(i.e., roughly $20 per visit). One Monday, just after you have paid and changed into "
     "your gym clothes, you receive a phone call that requires you to leave and forgo your "
     "exercise that evening.\n" + _GYM_QUESTION,
-    "ratings",
+    "ratings", params={"statements": GYM_STATEMENTS},
 )
 
 # Purchases and bonuses: Plane (Shafir & Thaler 2006) -------------------------

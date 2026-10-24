@@ -11,7 +11,8 @@ from pathlib import Path
 from typing import Any
 
 from .client import OpenRouterClient, OpenRouterError
-from .survey import RETRY_PROMPT, SYSTEM_PROMPT, get_item, item_order, page_prompt, parse_answer
+from .survey import RETRY_PROMPT, get_item, item_order, page_prompt, parse_answer
+from .variants import VARIANTS, Variant
 
 
 def model_slug(model_id: str) -> str:
@@ -33,26 +34,28 @@ def done_ids(path: Path) -> set[int]:
 
 
 async def run_participant(
-    client: OpenRouterClient, model_id: str, pid: int, cfg: dict[str, Any]
+    client: OpenRouterClient, model_id: str, pid: int, cfg: dict[str, Any],
+    variant: Variant | None = None,
 ) -> dict[str, Any]:
+    variant = variant or VARIANTS["base"]
     rng = random.Random(participant_seed(model_id, pid))
-    order = item_order(rng)
+    order = item_order(rng, variant=variant)
     gen = cfg["generation"]
     params = {
         "temperature": gen.get("temperature"),
         "max_tokens": gen.get("max_tokens"),
         "reasoning": gen.get("reasoning"),
     }
-    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    messages = [{"role": "system", "content": variant.system_prompt}]
     pages, answers = [], {}
     cost, tokens_in, tokens_out = 0.0, 0, 0
     rec: dict[str, Any] = {
-        "participant_id": pid, "model": model_id, "order": order,
+        "participant_id": pid, "model": model_id, "variant": variant.name, "order": order,
         "started": time.time(), "complete": False, "error": None,
     }
     try:
         for idx, item_id in enumerate(order):
-            item = get_item(item_id)
+            item = get_item(item_id, variant)
             options = list(item.options)
             if cfg.get("shuffle_options") and item.kind == "choice" and item.scenario != "Quality":
                 rng.shuffle(options)
@@ -91,7 +94,8 @@ async def run_participant(
     return rec
 
 
-async def run_model(model_id: str, cfg: dict[str, Any], out_dir: Path, n: int | None = None) -> None:
+async def run_model(model_id: str, cfg: dict[str, Any], out_dir: Path, n: int | None = None,
+                    variant: Variant | None = None) -> None:
     n = n or cfg["n_participants"]
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"{model_slug(model_id)}.jsonl"
@@ -106,7 +110,7 @@ async def run_model(model_id: str, cfg: dict[str, Any], out_dir: Path, n: int | 
 
     async def one(pid: int) -> None:
         async with sem:
-            rec = await run_participant(client, model_id, pid, cfg)
+            rec = await run_participant(client, model_id, pid, cfg, variant)
         async with lock:
             if rec["error"] and " answer on " not in rec["error"]:
                 # API/transport failure: not a participant outcome; retried on the next run.

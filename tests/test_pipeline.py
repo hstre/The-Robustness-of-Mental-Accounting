@@ -108,3 +108,59 @@ def test_degenerate_model_is_finite():
     assert np.isfinite(est) and np.isfinite(se) and est > 0
     est, se = analysis.evidence_ratio(0, 50)
     assert np.isfinite(est) and est < 0
+
+
+class GenericClient:
+    """Answers any page validly by reading the requested JSON keys from the prompt."""
+
+    def __init__(self, seed: int):
+        self.rng = random.Random(seed)
+
+    async def chat(self, model, messages, **params):
+        import re
+        last = [m["content"] for m in messages if m["role"] == "user"][-1]
+        if '{"answer"' in last:
+            opts = re.findall(r"^- (.+)$", last.split("Options:")[1], re.M)
+            out = {"answer": self.rng.choice(opts)}
+        elif '{"price"' in last:
+            out = {"price": self.rng.choice([2, 4, 6])}
+        elif "<1-5>" in last:
+            keys = re.findall(r'"(\w+)": <1-5>', last)
+            out = {k: self.rng.randint(1, 5) for k in keys}
+        else:
+            keys = re.findall(r'"(\w+)": <price', last)
+            out = {k: self.rng.choice([0, 8, 16]) for k in keys}
+        return {"content": json.dumps(out), "reasoning": None, "usage": {}, "provider": "x",
+                "finish_reason": "stop"}
+
+
+def test_variants_run_and_analyze(tmp_path):
+    import pandas as pd
+    from ma_llm.variants import VARIANTS
+
+    for name in ("neutral", "rational", "paraphrase", "between"):
+        v = VARIANTS[name]
+        raw = tmp_path / name
+        raw.mkdir()
+        with (raw / "fake__a.jsonl").open("w") as f:
+            for pid in range(30):
+                rec = asyncio.run(run_participant(GenericClient(pid), "fake/a", pid, CFG, v))
+                assert rec["complete"], (name, rec["error"])
+                assert rec["variant"] == name
+                if name == "between":
+                    scen = [i for i in rec["order"] if i in v.items]
+                    assert len(scen) == 10 and len({i.rstrip("0123456789") for i in scen}) == 7
+                f.write(json.dumps(rec) + "\n")
+        analysis.analyze(raw, tmp_path / f"res_{name}", variant=v)
+        eff = pd.read_csv(tmp_path / f"res_{name}" / "effects_by_model.csv")
+        assert len(eff) == 8 and eff["estimate"].notna().sum() >= 7, (name, eff)
+
+
+def test_paraphrase_prompts_use_own_amounts():
+    from ma_llm.survey import page_prompt
+    from ma_llm.variants import VARIANTS
+
+    v = VARIANTS["paraphrase"]
+    assert '"friend_face16"' in page_prompt(v.items["Game1"], False)
+    assert '"wasted_15"' in page_prompt(v.items["Gym1"], False)
+    assert "$35" not in page_prompt(v.items["Plane1"], False)
