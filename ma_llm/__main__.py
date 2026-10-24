@@ -105,6 +105,20 @@ def cmd_analyze(cfg: dict, args) -> None:
     print((out / "summary.md").read_text())
 
 
+def cmd_compare(cfg: dict, args) -> None:
+    from .compare import compare
+
+    compare(Path(args.raw_dir), Path(args.out_dir))
+    print((Path(args.out_dir) / "variants.md").read_text())
+
+
+def cmd_compare(cfg: dict, args) -> None:
+    from .compare import compare
+
+    compare(Path(args.raw_dir), Path(args.out_dir))
+    print((Path(args.out_dir) / "variants.md").read_text())
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(prog="ma_llm")
     ap.add_argument("--config", default=str(ROOT / "config" / "study.yaml"))
@@ -126,10 +140,13 @@ def main() -> None:
     a.add_argument("--raw-dir", default=str(ROOT / "data" / "raw"))
     a.add_argument("--out-dir", default=str(ROOT / "results"))
     a.add_argument("--variant", choices=list(VARIANTS), default="base")
+    c = sub.add_parser("compare", help="compare all variants (first 3 runs per model)")
+    c.add_argument("--raw-dir", default=str(ROOT / "data" / "raw"))
+    c.add_argument("--out-dir", default=str(ROOT / "results"))
     args = ap.parse_args()
     cfg = load_cfg(Path(args.config))
     {"check": cmd_check, "estimate": cmd_estimate, "preview": cmd_preview,
-     "run": cmd_run, "analyze": cmd_analyze}[args.cmd](cfg, args)
+     "run": cmd_run, "analyze": cmd_analyze, "compare": cmd_compare}[args.cmd](cfg, args)
 
 
 if __name__ == "__main__":

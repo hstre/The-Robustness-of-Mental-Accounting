@@ -84,6 +84,26 @@ Gespeichert wird das komplette Transkript inkl. Rohantworten, Reihenfolge und Ko
 - `between_subjects.csv`, `profile_vs_humans.csv`, `mds_coordinates.csv`
 - `figure1_llm.png` – Gegenstück zu Figure 1
 
+## Varianten (Ursachen-Tests)
+
+`ma_llm/variants.py` definiert neben `base` vier Varianten:
+
+| Variante | Änderung |
+|---|---|
+| `neutral` | Systemprompt ohne Teilnehmer-Rolle |
+| `rational` | Anweisung, als voll rationaler Akteur zu entscheiden (Fungibilität, keine Sunk Costs) |
+| `paraphrase` | Neue Geschichten/Beträge mit identischer Struktur (Konzert, Yoga, Zug-Upgrade …) |
+| `between` | Pro Gespräch nur eine Bedingung je Szenario |
+
+```bash
+python -m ma_llm run --variant paraphrase --n 3
+python -m ma_llm analyze --variant paraphrase   # -> results/paraphrase/
+python -m ma_llm compare                        # -> results/variants.md
+```
+
+`compare` nimmt pro Modell die ersten 3 Durchläufe (auch bei `base`) und poolt alle
+Modelle; die Intervalle ignorieren die Modell-Clusterung und sind nur grob.
+
 ## Tests
 
 ```bash

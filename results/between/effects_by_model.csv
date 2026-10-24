@@ -1,0 +1,97 @@
+model,family,effect,metric,n,estimate,se,ci_low,ci_high,replicated
+anthropic/claude-sonnet-5.5,Anthropic,MrAB_gains,evidence ratio,3,2.5902671654458267,1.0327955589886444,0.5660250664351709,4.6145092644564825,True
+anthropic/claude-sonnet-5.5,Anthropic,MrAB_losses,evidence ratio,3,0.1335313926245223,1.5118578920369088,-2.829655625510464,3.0967184107595087,False
+anthropic/claude-sonnet-5.5,Anthropic,Game,log OR,3,0.0,2.138089935299395,-4.190579268894389,4.190579268894389,False
+anthropic/claude-sonnet-5.5,Anthropic,Drink,Cohen's d,3,,,,,False
+anthropic/claude-sonnet-5.5,Anthropic,Jacket,log OR,3,0.5108256237659907,2.250925735484551,-3.900907749658062,4.922558997190043,False
+anthropic/claude-sonnet-5.5,Anthropic,Play,log OR,3,0.5108256237659907,2.250925735484551,-3.900907749658062,4.922558997190043,False
+anthropic/claude-sonnet-5.5,Anthropic,Gym,Cohen's d,3,,,,,False
+anthropic/claude-sonnet-5.5,Anthropic,Plane,log OR,3,2.70805020110221,2.250925735484551,-1.7036831723218424,7.119783574526263,False
+cohere/command-a-plus,Cohere,MrAB_gains,evidence ratio,3,0.1335313926245223,1.5118578920369088,-2.829655625510464,3.0967184107595087,False
+cohere/command-a-plus,Cohere,MrAB_losses,evidence ratio,3,0.1335313926245223,1.5118578920369088,-2.829655625510464,3.0967184107595087,False
+cohere/command-a-plus,Cohere,Game,log OR,3,0.0,2.138089935299395,-4.190579268894389,4.190579268894389,False
+cohere/command-a-plus,Cohere,Drink,Cohen's d,3,,,,,False
+cohere/command-a-plus,Cohere,Jacket,log OR,3,0.5108256237659907,2.250925735484551,-3.900907749658062,4.922558997190043,False
+cohere/command-a-plus,Cohere,Play,log OR,3,-1.0986122886681098,2.0,-5.018540257748218,2.821315680411998,False
+cohere/command-a-plus,Cohere,Gym,Cohen's d,3,,,,,False
+cohere/command-a-plus,Cohere,Plane,log OR,3,2.70805020110221,2.250925735484551,-1.7036831723218424,7.119783574526263,False
+deepseek/deepseek-v4.1-flash,DeepSeek,MrAB_gains,evidence ratio,3,2.5902671654458267,1.0327955589886444,0.5660250664351709,4.6145092644564825,True
+deepseek/deepseek-v4.1-flash,DeepSeek,MrAB_losses,evidence ratio,3,0.1335313926245223,1.5118578920369088,-2.829655625510464,3.0967184107595087,False
+deepseek/deepseek-v4.1-flash,DeepSeek,Game,log OR,3,0.0,2.138089935299395,-4.190579268894389,4.190579268894389,False
+deepseek/deepseek-v4.1-flash,DeepSeek,Drink,Cohen's d,3,,,,,False
+deepseek/deepseek-v4.1-flash,DeepSeek,Jacket,log OR,3,2.70805020110221,2.250925735484551,-1.7036831723218424,7.119783574526263,False
+deepseek/deepseek-v4.1-flash,DeepSeek,Play,log OR,3,0.5108256237659907,2.250925735484551,-3.900907749658062,4.922558997190043,False
+deepseek/deepseek-v4.1-flash,DeepSeek,Gym,Cohen's d,3,,,,,False
+deepseek/deepseek-v4.1-flash,DeepSeek,Plane,log OR,3,-0.5108256237659907,2.250925735484551,-4.922558997190043,3.900907749658062,False
+google/gemini-3.8-flash,Google,MrAB_gains,evidence ratio,3,4.025351690735149,1.5118578920369088,1.0621646726001623,6.988538708870135,True
+google/gemini-3.8-flash,Google,MrAB_losses,evidence ratio,3,1.568615917913845,1.0327955589886444,-0.45562618109681075,3.5928580169245006,False
+google/gemini-3.8-flash,Google,Game,log OR,3,2.5649493574615367,1.8126539343499315,-0.9877870702991607,6.117685785222234,False
+google/gemini-3.8-flash,Google,Drink,Cohen's d,3,,,,,False
+google/gemini-3.8-flash,Google,Jacket,log OR,3,1.0986122886681098,1.9999999999999998,-2.821315680411998,5.018540257748217,False
+google/gemini-3.8-flash,Google,Play,log OR,3,2.70805020110221,2.250925735484551,-1.7036831723218424,7.119783574526263,False
+google/gemini-3.8-flash,Google,Gym,Cohen's d,3,,,,,False
+google/gemini-3.8-flash,Google,Plane,log OR,3,,,,,False
+meta/muse-spark-1.3,Meta,MrAB_gains,evidence ratio,3,4.025351690735149,1.5118578920369088,1.0621646726001623,6.988538708870135,True
+meta/muse-spark-1.3,Meta,MrAB_losses,evidence ratio,3,4.025351690735149,1.5118578920369088,1.0621646726001623,6.988538708870135,True
+meta/muse-spark-1.3,Meta,Game,log OR,3,1.9771626925594177,1.8309508328682538,-1.6114349973259756,5.565760382444811,False
+meta/muse-spark-1.3,Meta,Drink,Cohen's d,3,,,,,False
+meta/muse-spark-1.3,Meta,Jacket,log OR,3,2.70805020110221,2.250925735484551,-1.7036831723218424,7.119783574526263,False
+meta/muse-spark-1.3,Meta,Play,log OR,3,2.70805020110221,2.250925735484551,-1.7036831723218424,7.119783574526263,False
+meta/muse-spark-1.3,Meta,Gym,Cohen's d,3,,,,,False
+meta/muse-spark-1.3,Meta,Plane,log OR,3,,,,,False
+minimax/minimax-m3,MiniMax,MrAB_gains,evidence ratio,3,2.5902671654458267,1.0327955589886444,0.5660250664351709,4.6145092644564825,True
+minimax/minimax-m3,MiniMax,MrAB_losses,evidence ratio,3,2.5902671654458267,1.0327955589886444,0.5660250664351709,4.6145092644564825,True
+minimax/minimax-m3,MiniMax,Game,log OR,3,0.0,2.138089935299395,-4.190579268894389,4.190579268894389,False
+minimax/minimax-m3,MiniMax,Drink,Cohen's d,3,,,,,False
+minimax/minimax-m3,MiniMax,Jacket,log OR,3,,,,,False
+minimax/minimax-m3,MiniMax,Play,log OR,3,-2.70805020110221,2.250925735484551,-7.119783574526263,1.7036831723218424,False
+minimax/minimax-m3,MiniMax,Gym,Cohen's d,3,,,,,False
+minimax/minimax-m3,MiniMax,Plane,log OR,3,,,,,False
+mistralai/mistral-large-4-0,Mistral,MrAB_gains,evidence ratio,3,2.5902671654458267,1.0327955589886444,0.5660250664351709,4.6145092644564825,True
+mistralai/mistral-large-4-0,Mistral,MrAB_losses,evidence ratio,3,0.1335313926245223,1.5118578920369088,-2.829655625510464,3.0967184107595087,False
+mistralai/mistral-large-4-0,Mistral,Game,log OR,3,0.0,2.138089935299395,-4.190579268894389,4.190579268894389,False
+mistralai/mistral-large-4-0,Mistral,Drink,Cohen's d,3,,,,,False
+mistralai/mistral-large-4-0,Mistral,Jacket,log OR,3,2.70805020110221,2.250925735484551,-1.7036831723218424,7.119783574526263,False
+mistralai/mistral-large-4-0,Mistral,Play,log OR,3,,,,,False
+mistralai/mistral-large-4-0,Mistral,Gym,Cohen's d,3,,,,,False
+mistralai/mistral-large-4-0,Mistral,Plane,log OR,3,,,,,False
+moonshotai/kimi-k3,Moonshot,MrAB_gains,evidence ratio,3,2.5902671654458267,1.0327955589886444,0.5660250664351709,4.6145092644564825,True
+moonshotai/kimi-k3,Moonshot,MrAB_losses,evidence ratio,3,0.1335313926245223,1.5118578920369088,-2.829655625510464,3.0967184107595087,False
+moonshotai/kimi-k3,Moonshot,Game,log OR,3,0.0,2.138089935299395,-4.190579268894389,4.190579268894389,False
+moonshotai/kimi-k3,Moonshot,Drink,Cohen's d,3,,,,,False
+moonshotai/kimi-k3,Moonshot,Jacket,log OR,3,-0.5108256237659907,2.250925735484551,-4.922558997190043,3.900907749658062,False
+moonshotai/kimi-k3,Moonshot,Play,log OR,3,2.70805020110221,2.250925735484551,-1.7036831723218424,7.119783574526263,False
+moonshotai/kimi-k3,Moonshot,Gym,Cohen's d,3,,,,,False
+moonshotai/kimi-k3,Moonshot,Plane,log OR,3,2.70805020110221,2.250925735484551,-1.7036831723218424,7.119783574526263,False
+openai/gpt-6-sol,OpenAI,MrAB_gains,evidence ratio,3,4.025351690735149,1.5118578920369088,1.0621646726001623,6.988538708870135,True
+openai/gpt-6-sol,OpenAI,MrAB_losses,evidence ratio,3,2.5902671654458267,1.0327955589886444,0.5660250664351709,4.6145092644564825,True
+openai/gpt-6-sol,OpenAI,Game,log OR,3,1.2656663733312759,1.9023794624226837,-2.4629288579458537,4.994261604608405,False
+openai/gpt-6-sol,OpenAI,Drink,Cohen's d,3,,,,,False
+openai/gpt-6-sol,OpenAI,Jacket,log OR,3,,,,,False
+openai/gpt-6-sol,OpenAI,Play,log OR,3,-0.5108256237659907,2.250925735484551,-4.922558997190043,3.900907749658062,False
+openai/gpt-6-sol,OpenAI,Gym,Cohen's d,3,,,,,False
+openai/gpt-6-sol,OpenAI,Plane,log OR,3,2.70805020110221,2.250925735484551,-1.7036831723218424,7.119783574526263,False
+qwen/qwen3.8-max-0902,Alibaba (Qwen),MrAB_gains,evidence ratio,3,4.025351690735149,1.5118578920369088,1.0621646726001623,6.988538708870135,True
+qwen/qwen3.8-max-0902,Alibaba (Qwen),MrAB_losses,evidence ratio,3,1.568615917913845,1.0327955589886444,-0.45562618109681075,3.5928580169245006,False
+qwen/qwen3.8-max-0902,Alibaba (Qwen),Game,log OR,3,0.0,2.138089935299395,-4.190579268894389,4.190579268894389,False
+qwen/qwen3.8-max-0902,Alibaba (Qwen),Drink,Cohen's d,3,,,,,False
+qwen/qwen3.8-max-0902,Alibaba (Qwen),Jacket,log OR,3,2.70805020110221,2.250925735484551,-1.7036831723218424,7.119783574526263,False
+qwen/qwen3.8-max-0902,Alibaba (Qwen),Play,log OR,3,0.5108256237659907,2.250925735484551,-3.900907749658062,4.922558997190043,False
+qwen/qwen3.8-max-0902,Alibaba (Qwen),Gym,Cohen's d,3,,,,,False
+qwen/qwen3.8-max-0902,Alibaba (Qwen),Plane,log OR,3,2.70805020110221,2.250925735484551,-1.7036831723218424,7.119783574526263,False
+x-ai/grok-4.7,xAI,MrAB_gains,evidence ratio,3,2.5902671654458267,1.0327955589886444,0.5660250664351709,4.6145092644564825,True
+x-ai/grok-4.7,xAI,MrAB_losses,evidence ratio,3,0.1335313926245223,1.5118578920369088,-2.829655625510464,3.0967184107595087,False
+x-ai/grok-4.7,xAI,Game,log OR,3,0.0,2.138089935299395,-4.190579268894389,4.190579268894389,False
+x-ai/grok-4.7,xAI,Drink,Cohen's d,3,,,,,False
+x-ai/grok-4.7,xAI,Jacket,log OR,3,-0.5108256237659907,2.250925735484551,-4.922558997190043,3.900907749658062,False
+x-ai/grok-4.7,xAI,Play,log OR,3,2.70805020110221,2.250925735484551,-1.7036831723218424,7.119783574526263,False
+x-ai/grok-4.7,xAI,Gym,Cohen's d,3,,,,,False
+x-ai/grok-4.7,xAI,Plane,log OR,3,-0.5108256237659907,2.250925735484551,-4.922558997190043,3.900907749658062,False
+z-ai/glm-5.3,Zhipu (GLM),MrAB_gains,evidence ratio,3,2.5902671654458267,1.0327955589886444,0.5660250664351709,4.6145092644564825,True
+z-ai/glm-5.3,Zhipu (GLM),MrAB_losses,evidence ratio,3,0.1335313926245223,1.5118578920369088,-2.829655625510464,3.0967184107595087,False
+z-ai/glm-5.3,Zhipu (GLM),Game,log OR,3,1.9771626925594177,1.8309508328682538,-1.6114349973259756,5.565760382444811,False
+z-ai/glm-5.3,Zhipu (GLM),Drink,Cohen's d,3,,,,,False
+z-ai/glm-5.3,Zhipu (GLM),Jacket,log OR,3,,,,,False
+z-ai/glm-5.3,Zhipu (GLM),Play,log OR,3,-0.5108256237659907,2.250925735484551,-4.922558997190043,3.900907749658062,False
+z-ai/glm-5.3,Zhipu (GLM),Gym,Cohen's d,3,,,,,False
+z-ai/glm-5.3,Zhipu (GLM),Plane,log OR,3,2.70805020110221,2.250925735484551,-1.7036831723218424,7.119783574526263,False

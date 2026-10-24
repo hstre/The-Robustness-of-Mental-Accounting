@@ -1,0 +1,13 @@
+model,n_started,n_complete,n_included,cost_usd,n_truncated,n_unparseable,family,parse_retry_rate
+anthropic/claude-sonnet-5.5,3,3,3,0.169688,0,0,Anthropic,0.0
+cohere/command-a-plus,3,3,3,0.0673545,0,0,Cohere,0.022222222222222223
+deepseek/deepseek-v4.1-flash,3,3,3,0.020823822752000003,0,0,DeepSeek,0.0
+google/gemini-3.8-flash,3,3,3,0.043436249999999996,0,0,Google,0.0
+meta/muse-spark-1.3,3,3,3,0.1023346,0,0,Meta,0.0
+minimax/minimax-m3,3,3,3,0.014235419999999999,0,0,MiniMax,0.0
+mistralai/mistral-large-4-0,3,3,3,0.41367956,0,0,Mistral,0.022222222222222223
+moonshotai/kimi-k3,3,3,3,0.07867778,0,0,Moonshot,0.0
+openai/gpt-6-sol,3,3,3,0.0499366,0,0,OpenAI,0.0
+qwen/qwen3.8-max-0902,3,3,3,0.115084,0,0,Alibaba (Qwen),0.0
+x-ai/grok-4.7,3,3,3,0.144426,0,0,xAI,0.0
+z-ai/glm-5.3,3,3,3,0.013040483000000002,0,0,Zhipu (GLM),0.0

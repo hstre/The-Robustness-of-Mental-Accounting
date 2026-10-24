@@ -84,6 +84,8 @@ def _log_or(a: float, b: float, c: float, d: float) -> tuple[float, float]:
 
 def log_or_binary(y1: np.ndarray, y0: np.ndarray) -> tuple[float, float]:
     """Effect of condition 1 vs condition 0 on P(y=1)."""
+    if len(y1) == 0 or len(y0) == 0:
+        return float("nan"), float("nan")
     return _log_or(y1.sum(), len(y1) - y1.sum(), y0.sum(), len(y0) - y0.sum())
 
 
@@ -95,6 +97,8 @@ def evidence_ratio(k: int, n: int) -> tuple[float, float]:
 
 def cohens_d(x1: np.ndarray, x0: np.ndarray) -> tuple[float, float]:
     n1, n0 = len(x1), len(x0)
+    if n1 < 2 or n0 < 2:
+        return float("nan"), float("nan")
     sp = math.sqrt(((n1 - 1) * x1.var(ddof=1) + (n0 - 1) * x0.var(ddof=1)) / (n1 + n0 - 2))
     if sp == 0:
         return float("nan"), float("nan")
@@ -293,6 +297,12 @@ def analyze(raw_dir: Path, out_dir: Path, families: dict[str, str] | None = None
         desc.append({"model": model, **descriptives(g, items)})
     eff_df = pd.DataFrame(rows)
     eff_df.to_csv(out_dir / "effects_by_model.csv", index=False)
+    # All included runs of all models treated as one sample. Ignores model clustering, so
+    # the CI is too narrow; used only to compare variants with few runs per model.
+    pooled = [{"effect": eff, "metric": METRIC[eff], "n": len(inc), "estimate": e, "se": se,
+               "ci_low": e - Z * se, "ci_high": e + Z * se}
+              for eff, (e, se) in model_effects(inc, rng, items).items()]
+    pd.DataFrame(pooled).to_csv(out_dir / "effects_all_runs_pooled.csv", index=False)
     pd.DataFrame(between).to_csv(out_dir / "between_subjects.csv", index=False)
     pd.DataFrame(desc).to_csv(out_dir / "descriptives.csv", index=False)
 
@@ -354,7 +364,7 @@ def write_summary(out_dir: Path, samp: pd.DataFrame, eff_df: pd.DataFrame, meta_
         total = int(rep.to_numpy().sum())
         lines += ["## Unpooled replication (95% CI > 0 in predicted direction)", "",
                   f"Overall: {total}/{rep.size} effects ({total / rep.size:.1%}); humans: 133/147 (90.5%).", "",
-                  rep.replace({True: "yes", False: "no"}).to_markdown(), ""]
+                  rep.map(lambda x: "" if pd.isna(x) else "yes" if x else "no").to_markdown(), ""]
     if mds_note:
         lines += ["## Exploratory MDS", "", mds_note, ""]
     (out_dir / "summary.md").write_text("\n".join(lines))
