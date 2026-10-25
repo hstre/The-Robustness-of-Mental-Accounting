@@ -2,7 +2,7 @@
 
 ## Replicating and probing Priolo et al. (2026) across twelve large language models
 
-Oct 24, 2026 · Steffen Rentschler· Working paper draft
+Oct 24, 2026 · Steffen Rentschler · Working paper draft
 
 ## Abstract
 
