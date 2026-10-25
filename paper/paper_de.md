@@ -2,7 +2,7 @@
 
 ## Replikation und Prüfung von Priolo et al. (2026) mit zwölf großen Sprachmodellen
 
-24. Oktober 2026 · Steffen · Arbeitspapier (Entwurf)
+24. Oktober 2026 · Steffen Rentschler· Arbeitspapier (Entwurf)
 
 ## Zusammenfassung
 
